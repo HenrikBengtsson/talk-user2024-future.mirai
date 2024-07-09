@@ -424,15 +424,13 @@ future.mirai: Use the Mirai Parallelization Framework in Futureverse - Easy!
 <div class="fragment">
 <div class="absolute" style="top: 360px; width: 80%; ">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1" data-code-line-numbers="1|1-2|"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="sc">&gt;</span> x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span></span>
-<span id="cb1-2"><a href=""></a><span class="sc">&gt;</span> y <span class="ot">&lt;-</span> <span class="fu">slow_sum</span>(x)            <span class="co"># ~1 min ... waiting!</span></span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="sc">&gt;</span> x <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span></span>
+<span id="cb1-2"><a href=""></a><span class="sc">&gt;</span> y <span class="ot">&lt;-</span> <span class="fu">slow_sum</span>(x)       <span class="co"># ~1 min ... waiting!</span></span>
 <span id="cb1-3"><a href=""></a><span class="sc">&gt;</span> y</span>
 <span id="cb1-4"><a href=""></a>[<span class="dv">1</span>] <span class="dv">5050</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
-</div>
-<div class="fragment">
-<div class="absolute" style="bottom: 300px; ">
+<div class="absolute" style="bottom: 260px; ">
 <p>Total time: <strong>1 minute</strong></p>
 </div>
 </div>
@@ -700,7 +698,7 @@ future.mirai: Use the Mirai Parallelization Framework in Futureverse - Easy!
 <div class="column" style="width:49%;">
 <div class="quarto-figure quarto-figure-center">
 <figure><p><img data-src="images/revdep_over_time_on_CRAN.png"></p>
-<figcaption><strong>~400 CRAN packages</strong> depend directly on the <strong>future</strong> package - it grows 3× faster than <strong>foreach</strong> at 1200 reverse dependencies</figcaption></figure>
+<figcaption><strong>~400 CRAN packages</strong> depend directly on the <strong>future</strong> package - thousands more recursively</figcaption></figure>
 </div>
 </div>
 <div class="column fragment" data-fragment-index="2" style="width:49%;">
@@ -746,13 +744,14 @@ future.mirai: Use the Mirai Parallelization Framework in Futureverse - Easy!
 <ul>
 <li>
 <strong>future.apply</strong>, <strong>furrr</strong>, <strong>foreach</strong> with <strong>doFuture</strong>, …</li>
+<li>built-in protection, e.g.&nbsp;too large objects, over parallelization, …</li>
 <li>automatically relays output, messages, warnings, errors, etc.</li>
 <li>real-time progress updates</li>
 <li>100’s of packages already parallelize via futures<br><span class="math inline">\(\Rightarrow\)</span>they can all use <code>plan(mirai_multisession)</code> immediately</li>
 </ul>
 </li>
 <li>
-<p><strong>mirai</strong> is is self-contained implementation</p>
+<p><strong>mirai</strong> is a self-contained implementation</p>
 <ul>
 <li>optimized for minimum overhead</li>
 <li>undergoes stunning development</li>
