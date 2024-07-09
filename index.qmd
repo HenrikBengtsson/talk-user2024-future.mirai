@@ -4,6 +4,7 @@ format:
     slide-number: true
     logo: images/future-logo.png
     footer: <https://www.futureverse.org>
+    include-in-header: heading-meta.html
     code-copy: true
     center-title-slide: false
     code-link: true
