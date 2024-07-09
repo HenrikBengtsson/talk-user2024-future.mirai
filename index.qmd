@@ -1,0 +1,520 @@
+---
+format: 
+  revealjs:
+    slide-number: true
+    logo: images/future-logo.png
+    footer: <https://www.futureverse.org>
+    code-copy: true
+    center-title-slide: false
+    code-link: true
+    code-overflow: wrap
+    highlight-style: a11y
+    width: 1600
+    height: 900
+    margin: 0.02
+    theme: [simple, assets/futureverse.scss]
+    css: [assets/custom.css, assets/syntax-highlight.css]
+    chalkboard: 
+      buttons: false
+    preview-links: auto
+    pointer:
+      pointerSize: 32
+
+revealjs-plugins:
+  - pointer
+  - bsicons
+
+execute:
+  eval: false
+  echo: true
+---
+
+<h1>future.mirai: Use the Mirai Parallelization Framework in Futureverse - Easy!</h1>
+
+<hr/>
+
+### Henrik Bengtsson
+
+#### University of California, San Francisco
+#### R Foundation
+#### R Consortium
+
+{{< bi github >}} {{< bi mastodon >}} {{< bi twitter-x >}} \@HenrikBengtsson<br>
+
+![](images/future-logo.png){.absolute top=325 left=1100 width="250"}
+![](images/mirai-logo.png){.absolute top=540 left=1225 width="250"}
+
+<br/>
+<br/>
+
+#### useR! 2024, Salzburg, Austria (2024-07-09)
+
+
+## Futureverse - A Friendly, Unifying Parallelization Framework in R
+
+![](images/future-logo.png){.absolute top=160 right=10 width=250}
+
+::: {.incremental}
+
+* Package **future** provides fundamental building blocks for
+  evaluating R code in parallel
+  
+  - `future()`, `value()`, and `resolved()`
+
+  - `%<-%` (future-assignment operator) on top of `future()` & `value()`
+
+:::
+
+. . .
+
+::: { .absolute top=360 width=80% }
+
+```{r eval = FALSE}
+#| code-line-numbers: "1|1-2|"
+> x <- 1:100
+> y <- slow_sum(x)            # ~1 min ... waiting!
+> y
+[1] 5050
+```
+
+:::
+
+. . .
+
+::: { .absolute bottom=300 }
+Total time: **1 minute**
+:::
+
+
+
+## Futureverse - A Friendly, Unifying Parallelization Framework in R
+
+![](images/future-logo.png){.absolute top=160 right=10 width=250}
+
+* Package **future** provides fundamental building blocks for
+  evaluating R code in parallel
+  
+  - `future()`, `value()`, and `resolved()`
+
+  - `%<-%` (future-assignment operator) on top of `future()` & `value()`
+
+::: { .absolute top=360 width=80% }
+
+```{r eval = FALSE}
+#| code-line-numbers: "1|1-2|1-3|1-4|"
+> x <- 1:100
+> a <- slow_sum(x[ 1:50 ])     # ~30 sec
+> b <- slow_sum(x[51:100])     # ~30 sec
+> y <- a + b
+> y
+[1] 5050
+```
+
+:::
+
+. . .
+
+::: { .absolute bottom=200 }
+Total time: **1 minute**
+:::
+
+
+
+
+## Evaluate R expressions in the background
+
+::: { .absolute width=60% }
+
+```{r eval = FALSE}
+#| code-line-numbers: "1-3|1-5|1-6|1-10|"
+> library(future)
+> plan(multisession)           # parallelize on
+                               # local machine
+> x <- 1:100
+> a %<-% slow_sum(x[ 1:50 ])   # ~0 sec
+> b %<-% slow_sum(x[51:100])   # ~0 sec
+
+> 1 + 2
+[1] 3
+
+> y <- a + b                   # get results
+> y
+[1] 5050
+```
+
+:::
+
+. . .
+
+::: { .absolute bottom=200 }
+Total time: **30 seconds**
+:::
+
+![](images/burn.gif){.absolute top=80 right=10 width="600"}
+
+
+
+## Splitting up into more chunks to speed it up further
+
+::: { .absolute width=60% }
+
+```{r eval = FALSE}
+#| code-line-numbers: "1-8|"
+> library(future)
+> plan(multisession)
+
+> x <- 1:100
+> a %<-% slow_sum(x[ 1:25 ])   # ~0 sec
+> b %<-% slow_sum(x[26:50 ])   # ~0 sec
+> c %<-% slow_sum(x[51:75 ])   # ~0 sec
+> d %<-% slow_sum(x[76:100])   # ~0 sec
+
+> y <- a + b + c + d           # get results
+> y
+[1] 5050
+```
+
+:::
+
+. . .
+
+::: { .absolute bottom=220 }
+Total time: **15 seconds**
+:::
+
+![](images/formula_one_pitstop_724x412.gif){.absolute top=80 right=10 width="600"}
+
+
+
+## End-user can choose from many parallel backends
+
+<br>
+
+```{r}
+#| code-line-numbers: "1|2|3|5|6|"
+plan(sequential)
+plan(multisession)        # uses {parallel}'s "snow" machinery
+plan(multicore)           # uses {parallel}'s "multicore" machinery
+
+plan(cluster, workers = c("n1", "n1", "n1", "n2", "n3"))
+plan(cluster, workers = c("n1", "m2.uni.edu", "vm.cloud.org"))
+```
+
+These are internally based on the **parallel** package.
+
+
+
+## Higher-level parallelization from `future()` and `value()`
+
+<div style="margin-top: -56px;"></div>
+
+::::: { .columns }
+
+:::: {.column width="49%" .fragment fragment-index=1}
+
+<br style="margin-top: 0.9ex">
+![](images/juggler-1ball.gif){ width="13%" }
+<br>
+<br style="margin-top: 3ex">
+
+```{r}
+y <- lapply(X, slow_sum)
+```
+
+::::
+
+
+:::: {.column width="49%" .fragment fragment-index=2}
+
+![](images/juggler-4balls.gif)
+
+```{r}
+plan(multisession, workers = 4)
+y <- future_lapply(X, slow_sum)
+```
+
+::::
+
+:::::
+
+. . .
+
+::: {.absolute bottom=120 right=25}
+
+Easily implemented via `future()` and `value()`, e.g.
+
+```{r}
+future_lapply <- function(X, FUN, ...) {
+  fs <- lapply(X, function(x) future(FUN(x, ...)))
+  lapply(fs, value)
+}
+```
+
+:::
+
+
+
+## User-friendly, higher-level functions
+
+::: {.incremental}
+* The concept of "futures" was invented in 1975 (sic!)
+* `future()`, `value()`, and `resolved()` are easy to understand,
+  powerful constructs
+:::
+
+. . .
+
+These building blocks lay the foundation for higher-level functions:
+
+ * **future.apply**, e.g. `future_lapply()` and `future_replicate()`
+ * **furrr**, e.g. `future_map()` and `future_map_dbl()`
+ * **doFuture**, e.g. `foreach() %dofuture% { ... }`
+ * ...
+ * _\- Maybe your package will be next?_
+
+![](images/purrr-logo.png){.absolute top=372 right=82 width=150}
+![](images/furrr-logo.png){.absolute top=500 right=10 width=150}
+
+
+
+## Futureverse allows you to stick with your favorite coding style
+
+Parallel alternatives to traditional, sequential functions:
+
+```{r}
+#| code-line-numbers: "1|"
+y <- lapply(x, some_fcn)                    ## base R
+y <- future_lapply(x, some_fcn)             ## {future.apply}
+```
+<span style="height:10px"/>
+
+. . .
+
+
+```{r}
+#| code-line-numbers: "1|"
+y <- map(x, some_fcn)                       ## {purrr}
+y <- future_map(x, some_fcn)                ## {furrr}
+```
+<span style="height:10px"/>
+
+. . .
+
+
+```{r}
+#| code-line-numbers: "1|"
+y <- foreach(z = x) %do% some_fcn(x)        ## {foreach}
+y <- foreach(z = x) %dofuture% some_fcn(z)  ## {foreach} + {doFuture}
+```
+
+. . .
+
+
+Yes, we can of course use base-R or **magrittr** pipes where we want to, e.g.
+
+```{r}
+y <- x |> future_map(some_fcn)
+```
+
+```{r}
+y <- x %>% future_map(some_fcn)
+```
+
+
+
+## Anyone can develop additional parallel backends
+
+From the very beginning in 2015, the plan and hope has been that
+additional R backends would become available in the future (pun
+intended!)
+
+. . .
+
+The **future.callr** package wraps the **callr** package that is an
+alternative to the built-in **parallel**-based `multisession` backend:
+
+```{r}
+plan(future.callr::callr)                     # locally using callr
+```
+
+. . .
+
+The **future.batchtools** package wraps the **batchtools** package
+that can run tasks on high-performance compute (HPC) clusters, e.g.
+
+```{r}
+plan(future.batchtools::batchtools_slurm)     # on a Slurm job scheduler
+plan(future.batchtools::batchtools_sge)       # on a SGE job scheduler
+```
+
+
+. . .
+
+And, now also **mirai**-based backends:
+
+```{r}
+plan(future.mirai::mirai_multisession)        # locally using mirai
+plan(future.mirai::mirai_cluster)             # using mirai cluster
+```
+
+
+## mirai - Minimalist Async Evaluation Framework for R
+
+![](images/mirai-logo.png){.absolute top=100 right=10 width=250}
+
+* The **mirai** R package by Charlie Gao (anno 2022)
+
+* _mirai_ is Japanese for "future"
+
+<div style="float: left">
+
+| Mirai API              |                    | Future API
+|:-----------------------|:-------------------|:--------------------
+| `m <- mirai(expr)`     | create a future    | `f <- future(expr)`
+| ` r <- !unresolved(m)` | check if done      | ` r <- resolved(f)`
+| `v <- m[]`             | wait & get result  | `v <- value(f)`
+
+</div>
+
+. . .
+
+* Somewhat lower-level interface than the **future** package
+
+* Minimum _overhead_ through highly optimized implementation
+
+. . .
+
+* **Provides a powerful queueing-mechanism for processing tasks in parallel**
+
+
+
+## future.mirai - A mirai-based parallel backend for Futureverse
+
+![](images/future-logo.png){.absolute top=125 left=1200 width="250"}
+![](images/mirai-logo.png){.absolute top=340 left=1325 width="250"}
+
+* Makes mirai ecosystem available to Futureverse
+
+* Existing Futureverse code can use it without modification
+
+. . .
+
+::: { .absolute width=66% }
+
+```{r}
+#| code-line-numbers: "1|1-3|1-7|1-9|1-11|"
+library(future.mirai)
+plan(mirai_multisession)   # parallelize via
+                           # mirai framework
+x <- rnorm(100)
+a %<-% sum(x[ 1:50 ])
+b %<-% sum(x[51:100])
+y <- a + b
+
+z <- future.apply::future_sapply(x, slow)
+
+z <- x |> furrr::future_map_dbl(slow)
+
+z <- foreach::foreach(.x = x) %dofuture% { slow(.x) }
+```
+
+:::
+
+
+## Futureverse is very well tested thanks to lots of real-world use
+
+:::: {.columns}
+
+::: {.column width="49%"}
+
+![**~400 CRAN packages** depend directly on the **future** package - it grows 3× faster than **foreach** at 1200 reverse dependencies](images/revdep_over_time_on_CRAN.png)
+
+:::
+
+::: {.column width="49%" .fragment fragment-index=2}
+
+![The **future** packages is among **the 1% most downloaded** CRAN packages](images/downloads_over_time_on_CRAN.png)
+
+:::
+
+::::
+
+
+## As a Futureverse user, you can help mirai!
+
+If you use one of the 100's of CRAN packages that parallelize via Futureverse, by setting:
+
+&nbsp;&nbsp; `plan(future.mirai::mirai_multisession)`
+
+you will parallelize via **mirai**, with all its benefits.
+
+. . .
+
+<br>
+
+Importantly, by doing so, you will also:
+
+* increase the real-world test coverage of **mirai**
+
+* help increase the stability and quality of **mirai**
+
+Please give feedback and reach out if you run into issues 🙏
+
+
+## Nested parallelization with some care
+
+* Futureverse protects against over parallelization
+* **future.mirai** opens up for more nested parallelization
+
+![](images/juggler-1ball.gif){width="8%" .absolute bottom=230 left=130}
+![](images/juggler-4balls.gif){width="10%" .absolute bottom=190 left=640}
+![](images/juggler_juggling_jugglers_who_juggle_balls.gif){width="25%" .absolute bottom=230 right=150}
+
+:::: {.columns width=90% .absolute bottom=50 left=100 }
+
+::: {.column width="33%"}
+Sequential<br>
+processing
+:::
+
+::: {.column width="33%"}
+Parallelization<br>
+with 4 workers
+:::
+
+::: {.column width="33%"}
+Nested parallelization<br>
+with 5 workers each<br>
+running 3 parallel tasks
+:::
+
+::::
+
+
+
+## Not a competition: Should I use Future API or Mirai API?
+
+* Futureverse is well established and well tested
+
+  - **future.apply**, **furrr**, **foreach** with **doFuture**, ...
+  - automatically relays output, messages, warnings, errors, etc.
+  - real-time progress updates
+  -  100's of packages already parallelize via futures<br>
+    $\Rightarrow$they can all use `plan(mirai_multisession)` immediately
+
+* **mirai** is is self-contained implementation
+
+  - optimized for minimum overhead
+  - undergoes stunning development
+
+
+## There is a promising future for parallelization in R
+
+* It’s easy to get started - just try it
+* Support: <https://github.com/HenrikBengtsson/future/discussions>
+* Tutorials: <https://www.futureverse.org/tutorials.html>
+* Blog posts: <https://www.futureverse.org/blog.html>
+* More features on the roadmap
+* I love feedback and ideas
+
+![](images/the-future-is-here.jpg){.absolute bottom=90 right=50 width="800"}

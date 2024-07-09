@@ -1,0 +1,18 @@
+project:
+  title: "future.mirai"
+
+format:
+  revealjs:
+    chalkboard: 
+      buttons: false
+    preview-links: auto
+    logo: images/future-logo.png
+    footer: <https://www.futureverse.org>
+    slide-number: true
+    margin: 0.05
+    pointer:
+      pointerSize: 32
+
+revealjs-plugins:
+  - pointer
+  - bsicons
