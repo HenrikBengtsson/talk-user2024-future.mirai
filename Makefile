@@ -3,8 +3,10 @@ install-extensions:
 	quarto install extension shafayetShafee/bsicons
 #	quarto install extension andrie/reveal-auto-agenda
 
-meta:
-	Rscript generate-meta.R
+meta: heading-meta.html
+
+heading-meta.html: heading-meta.R
+	Rscript "$<" > "$@"
 
 publish:
 	quarto publish
